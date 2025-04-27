@@ -5,6 +5,19 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "redirects": [
+      {
+        "source": "/",
+        "destination": "https://nuotraukos.net",
+        "type": 301
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/:fileName",
+        "destination": "/download.html"
+      }
     ]
   }
 }
